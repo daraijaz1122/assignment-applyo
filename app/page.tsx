@@ -1,103 +1,195 @@
-import Image from "next/image";
+"use client";
+import { Film, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import LoadingSpinner from "./_components/LoadingSpinner";
+import NoResults from "./_components/NoResults";
+import MoviesCard from "./_components/MoviesCard";
+import Footer from "./_components/Footer";
+
+interface movieProps {
+  Poster: string;
+  Title: string;
+  Type: string;
+  Year: string;
+  imdbID: string;
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [searchQuery, setSearchQuery] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [type, setType] = useState("");
+  const [year, setYear] = useState("");
+  const [totalResults, setTotalResults] = useState("");
+  const [response, setResponse] = useState(" ");
+  const [originalMovies, setOriginalMovies] = useState([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  const Omdb_Api = `https://www.omdbapi.com/?s=${searchQuery}&apikey=788040c1&page=${page}`;
+
+  const fetchMovies = async () => {
+    setLoading(true);
+    const data = await fetch(Omdb_Api);
+    const json = await data.json();
+    setLoading(false);
+    setMovies(json.Search);
+    console.log(json.Search);
+    setTotalResults(json.totalResults);
+    setResponse(json.Response);
+    setOriginalMovies(json.Search);
+  };
+
+  const filterMovies = (type: string, year: string) => {
+    if (!movies) return;
+    console.log(type, year, "input filters");
+    console.log("Input type:", `"${type}"`);
+    console.log("Input year:", `"${year}"`);
+    const filtered = originalMovies.filter((movie) => {
+      const matchesType = type ? movie?.Type === type : true;
+      const matchesYear = year ? movie?.Year === year : true;
+
+      return matchesType && matchesYear;
+    });
+
+    console.log(filtered);
+    setMovies(filtered);
+  };
+  useEffect(() => {
+    filterMovies(type, year);
+  }, [type, year]);
+  useEffect(() => {
+    fetchMovies();
+  }, [searchQuery, page]);
+
+  const totalPages = Math.ceil(parseInt(totalResults || "0") / 10);
+
+  return (
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <header className="relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10"></div>
+
+          <div className="relative max-w-6xl mx-auto px-6 py-16">
+            {/* Logo and Title */}
+            <div className="text-center mb-12">
+              <div className="flex justify-center items-center mb-4">
+                <Film className="w-12 h-12 text-purple-400 mr-3" />
+                <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  MovieFinder/Applyo
+                </h1>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <div className="max-w-3xl mx-auto">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
+                <div className="relative flex items-center bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-2 shadow-2xl">
+                  <input
+                    type="text"
+                    placeholder="Search movies, genres..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent text-white placeholder-slate-300 px-6 py-4 text-lg focus:outline-none"
+                  />
+
+                  <Search className="w-5 h-5  mr-6 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main className="max-w-7xl mx-auto px-6 py-12">
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+            {searchQuery && (
+              <>
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                    Search Results for "{searchQuery}"
+                  </h2>
+                  <p className="text-slate-400"> found {totalResults} movies</p>
+                </div>
+
+                <div className=" flex gap-4 w-full ">
+                  <select
+                    className="text-white font-semibold px-4 py-2 md:px-4 md:py-2 border-gray-300 bg-gray-400/50 rounded-lg w-1/2"
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                  >
+                    <option className="text-black" disabled>
+                      Select Type
+                    </option>
+                    <option className="text-black" value="movie">
+                      Movie
+                    </option>
+                    <option className="text-black" value="series">
+                      Series
+                    </option>
+                  </select>
+                  {type && (
+                    <input
+                      className="text-white font-semibold px-4 py-2 border-gray-300 bg-gray-400/50 rounded-lg w-1/2"
+                      type="number"
+                      placeholder="Year..."
+                      min="1900"
+                      max="2099"
+                      step="1"
+                      value={year}
+                      onChange={(e) => setYear(e.target.value)}
+                    />
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          {/* movie rendering logic */}
+          {loading ? (
+            <LoadingSpinner />
+          ) : response === "False" || movies?.length == null ? (
+            <NoResults />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {movies?.map((movie: movieProps, index: number) => (
+                <MoviesCard
+                  key={index}
+                  Poster={movie.Poster}
+                  Type={movie.Type}
+                  Year={movie.Year}
+                  Title={movie.Title}
+                  imdbID={movie.imdbID}
+                />
+              ))}
+            </div>
+          )}
+        </main>
+        {/* pagination */}
+        {response != "False" && (
+          <div className="flex justify-end items-center gap-5 px-16">
+            <button
+              onClick={() => setPage(page - 1)}
+              disabled={page === 1}
+              className="bg-gray-400/50 px-6 py-4 rounded-lg font-semibold hover:bg-white hover:text-cyan-600 cursor-pointer"
+            >
+              Previous
+            </button>
+
+            <button
+              onClick={() => setPage(page + 1)}
+              className="bg-gray-400/50 px-6 py-4 rounded-lg font-semibold hover:bg-white hover:text-cyan-600 cursor-pointer"
+              disabled={page === totalPages}
+            >
+              Next
+            </button>
+
+            <h2 className="px-4 py-4 font-bold  text-blue-700">
+              Page: {page} | {totalPages}
+            </h2>
+          </div>
+        )}
+        <Footer />
+      </div>
+    </>
   );
 }
