@@ -1,40 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import Image from "next/image";
-import { ExternalLink } from "lucide-react";
-
-// Loading spinner (you can replace with your component)
+import { useParams, useRouter } from "next/navigation";
+import { ChevronsLeft, ExternalLink } from "lucide-react";
 import LoadingSpinner from "@/app/_components/LoadingSpinner";
-
-// Optional fallback movie data for initial state or testing
-const defaultMovieData = {
-  Title: "",
-  Year: "",
-  Rated: "",
-  Released: "",
-  Runtime: "",
-  Genre: "",
-  Director: "",
-  Writer: "",
-  Actors: "",
-  Plot: "",
-  Language: "",
-  Country: "",
-  Awards: "",
-  Poster: "",
-  Ratings: [],
-  imdbRating: "",
-  imdbVotes: "",
-  imdbID: "",
-  Type: "",
-  DVD: "",
-  BoxOffice: "",
-  Production: "",
-  Website: "",
-  Response: "False",
-};
 
 type Rating = {
   Source: string;
@@ -70,10 +39,10 @@ type MovieData = {
 
 export default function MovieDetails() {
   const params = useParams();
-  const imdbID = params.imdbid;
   const [movieData, setMovieData] = useState<MovieData | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const router = useRouter();
+  const imdbID = params.imdbid;
   useEffect(() => {
     if (!imdbID) return;
     fetchMovieData();
@@ -97,83 +66,188 @@ export default function MovieDetails() {
     return <LoadingSpinner />;
   }
 
-  if (movieData?.Response === "False") {
-    return (
-      <div className="text-white text-center text-lg font-semibold py-10">
-        Movie not found!
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 py-12 px-4">
-      <div className="bg-white/5 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-        <div className="flex flex-col md:flex-row gap-8">
-          <img
-            src={movieData.Poster}
-            alt={movieData.Title}
-            className="rounded-lg shadow-lg object-cover"
-          />
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold mb-2">{movieData.Title}</h1>
-            <p className="text-gray-400 mb-4 italic">{movieData.Plot}</p>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <p>
-                <strong>Year:</strong> {movieData.Year}
-              </p>
-              <p>
-                <strong>Rated:</strong> {movieData.Rated}
-              </p>
-              <p>
-                <strong>Released:</strong> {movieData.Released}
-              </p>
-              <p>
-                <strong>Runtime:</strong> {movieData.Runtime}
-              </p>
-              <p>
-                <strong>Genre:</strong> {movieData.Genre}
-              </p>
-              <p>
-                <strong>Director:</strong> {movieData.Director}
-              </p>
-              <p>
-                <strong>Actors:</strong> {movieData.Actors}
-              </p>
-              <p>
-                <strong>Language:</strong> {movieData.Language}
-              </p>
-              <p>
-                <strong>Country:</strong> {movieData.Country}
-              </p>
-              <p>
-                <strong>Awards:</strong> {movieData.Awards}
-              </p>
-              <p>
-                <strong>Box Office:</strong> {movieData.BoxOffice}
-              </p>
-              <p>
-                <strong>Production:</strong> {movieData.Production}
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-pink-900 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-500/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-500/30 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
+      <div className="relative z-10 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <button
+              onClick={() => router.back()}
+              className="px-6 gap-2 py-2 bg-blue-500/20 text-white text-lg font-semibold flex items-center rounded-lg hover:bg-gray-400/50 cursor-pointer"
+            >
+              <ChevronsLeft className="h-6 w-6 text-white" />
+              Back
+            </button>
+            <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+              {movieData.Title}
+            </h1>
+            <div className="flex items-center justify-center gap-4 text-lg text-gray-300">
+              <span className="px-3 py-1 bg-blue-500/20 rounded-full border border-blue-400/30">
+                {movieData.Year}
+              </span>
+              <span className="px-3 py-1 bg-purple-500/20 rounded-full border border-purple-400/30">
+                {movieData.Rated}
+              </span>
+              <span className="px-3 py-1 bg-pink-500/20 rounded-full border border-pink-400/30">
+                {movieData.Runtime}
+              </span>
             </div>
-            <div className="mt-4 flex gap-2">
-              {movieData.Ratings?.map((rating, idx) => (
-                <div
-                  key={idx}
-                  className="px-3 py-1 rounded-full bg-gray-800 text-sm font-medium"
-                >
-                  {rating.Source}: {rating.Value}
+          </div>
+
+          {/* Main content */}
+          <div className="bg-white/5 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl border border-white/10 hover:border-purple-400/30 transition-all duration-500">
+            <div className="flex flex-col lg:flex-row">
+              {/* Movie Poster */}
+              <div className="lg:w-1/3 p-8">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-pink-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                  <img
+                    src={movieData.Poster}
+                    alt={movieData.Title}
+                    className="relative z-10 w-full h-auto rounded-2xl shadow-2xl object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <a
-                href={`https://www.imdb.com/title/${movieData.imdbID}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-blue-400 hover:underline"
-              >
-                View on IMDb <ExternalLink size={16} />
-              </a>
+              </div>
+
+              {/* Movie Details */}
+              <div className="lg:w-2/3 p-8 text-white">
+                {/* Plot */}
+                <div className="mb-8">
+                  <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    Plot Summary
+                  </h3>
+                  <p className="text-gray-300 text-lg leading-relaxed italic bg-gradient-to-r from-gray-800/50 to-purple-900/50 p-6 rounded-xl border border-purple-500/20">
+                    "{movieData.Plot}"
+                  </p>
+                </div>
+
+                {/* Movie Information Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-4 rounded-xl border border-blue-400/20">
+                      <span className="text-blue-300 font-semibold">
+                        Released:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.Released}
+                      </span>
+                    </div>
+                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-4 rounded-xl border border-purple-400/20">
+                      <span className="text-purple-300 font-semibold">
+                        Genre:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.Genre}
+                      </span>
+                    </div>
+                    <div className="bg-gradient-to-r from-pink-500/10 to-blue-500/10 p-4 rounded-xl border border-pink-400/20">
+                      <span className="text-pink-300 font-semibold">
+                        Director:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.Director}
+                      </span>
+                    </div>
+                    <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-4 rounded-xl border border-blue-400/20">
+                      <span className="text-blue-300 font-semibold">
+                        Language:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.Language}
+                      </span>
+                    </div>
+                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-4 rounded-xl border border-purple-400/20">
+                      <span className="text-purple-300 font-semibold">
+                        Country:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.Country}
+                      </span>
+                    </div>
+                    <div className="bg-gradient-to-r from-pink-500/10 to-blue-500/10 p-4 rounded-xl border border-pink-400/20">
+                      <span className="text-pink-300 font-semibold">
+                        Box Office:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.BoxOffice}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-4 rounded-xl border border-purple-400/20">
+                      <span className="text-purple-300 font-semibold">
+                        Actors:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.Actors}
+                      </span>
+                    </div>
+                    <div className="bg-gradient-to-r from-pink-500/10 to-blue-500/10 p-4 rounded-xl border border-pink-400/20">
+                      <span className="text-pink-300 font-semibold">
+                        Awards:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.Awards}
+                      </span>
+                    </div>
+                    <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-4 rounded-xl border border-blue-400/20">
+                      <span className="text-blue-300 font-semibold">
+                        Production:
+                      </span>
+                      <span className="ml-2 text-gray-200">
+                        {movieData.Production}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ratings */}
+                <div className="mb-8">
+                  <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    Ratings
+                  </h3>
+                  <div className="flex flex-wrap gap-4">
+                    {movieData.Ratings?.map((rating, idx) => (
+                      <div
+                        key={idx}
+                        className="px-6 py-3 rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-purple-400/30 text-white font-medium hover:scale-105 transition-transform duration-200"
+                      >
+                        <span className="text-purple-300">
+                          {rating.Source}:
+                        </span>
+                        <span className="ml-2 text-white font-bold">
+                          {rating.Value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* IMDb Link */}
+                <div className="flex justify-center">
+                  <a
+                    href={`https://www.imdb.com/title/${movieData.imdbID}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white font-semibold text-lg rounded-full shadow-lg transform hover:scale-105 transition-all duration-300"
+                  >
+                    <span>View on IMDb</span>
+                    <ExternalLink
+                      size={20}
+                      className="group-hover:rotate-12 transition-transform duration-300"
+                    />
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>

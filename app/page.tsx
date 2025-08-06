@@ -16,47 +16,54 @@ interface movieProps {
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState<movieProps[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [type, setType] = useState("");
   const [year, setYear] = useState("");
   const [totalResults, setTotalResults] = useState("");
   const [response, setResponse] = useState(" ");
-  const [originalMovies, setOriginalMovies] = useState([]);
+  const [movieList, setmovieList] = useState<movieProps[]>([]);
 
   const Omdb_Api = `https://www.omdbapi.com/?s=${searchQuery}&apikey=788040c1&page=${page}`;
 
+  //fetch movies
   const fetchMovies = async () => {
     setLoading(true);
-    const data = await fetch(Omdb_Api);
-    const json = await data.json();
-    setLoading(false);
-    setMovies(json.Search);
-    console.log(json.Search);
-    setTotalResults(json.totalResults);
-    setResponse(json.Response);
-    setOriginalMovies(json.Search);
-  };
+    try {
+      const data = await fetch(Omdb_Api);
+      const json = await data.json();
+      setLoading(false);
+      setMovies(json.Search);
 
+      setTotalResults(json.totalResults);
+      setResponse(json.Response);
+      setmovieList(json.Search);
+    } catch (error) {
+      console.log("Error searching movies", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  //filter movies
   const filterMovies = (type: string, year: string) => {
     if (!movies) return;
-    console.log(type, year, "input filters");
-    console.log("Input type:", `"${type}"`);
-    console.log("Input year:", `"${year}"`);
-    const filtered = originalMovies.filter((movie) => {
+    const filtered = movieList.filter((movie) => {
       const matchesType = type ? movie?.Type === type : true;
       const matchesYear = year ? movie?.Year === year : true;
 
       return matchesType && matchesYear;
     });
 
-    console.log(filtered);
     setMovies(filtered);
   };
+
+  //filter movies
   useEffect(() => {
     filterMovies(type, year);
   }, [type, year]);
+
+  //fetch movies
   useEffect(() => {
     fetchMovies();
   }, [searchQuery, page]);
@@ -170,14 +177,14 @@ export default function Home() {
             <button
               onClick={() => setPage(page - 1)}
               disabled={page === 1}
-              className="bg-gray-400/50 px-6 py-4 rounded-lg font-semibold hover:bg-white hover:text-cyan-600 cursor-pointer"
+              className="bg-blue-500/20 text-white px-6 py-4 rounded-lg font-semibold hover:bg-blue-500/30 hover:text-cyan-600 cursor-pointer"
             >
               Previous
             </button>
 
             <button
               onClick={() => setPage(page + 1)}
-              className="bg-gray-400/50 px-6 py-4 rounded-lg font-semibold hover:bg-white hover:text-cyan-600 cursor-pointer"
+              className="bg-blue-500/20 text-white px-6 py-4 rounded-lg font-semibold hover:bg-blue-500/30 hover:text-cyan-600 cursor-pointer"
               disabled={page === totalPages}
             >
               Next
