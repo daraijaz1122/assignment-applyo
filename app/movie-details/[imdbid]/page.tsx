@@ -104,9 +104,9 @@ export default function MovieDetails() {
 
           {/* Main content */}
           <div className="bg-white/5 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl border border-white/10 hover:border-purple-400/30 transition-all duration-500">
-            <div className="flex flex-col lg:flex-row">
+            <div className="flex flex-col lg:flex-row md:flex-row sm:flex-col items-center justify-between">
               {/* Movie Poster */}
-              <div className="lg:w-1/3 p-8">
+              <div className="lg:w-1/3 p-8 md:w-1/2 sm:w-48px ">
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-pink-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
                   <img
@@ -118,7 +118,7 @@ export default function MovieDetails() {
               </div>
 
               {/* Movie Details */}
-              <div className="lg:w-2/3 p-8 text-white">
+              <div className="lg:w-2/3  md:w-1/2 p-8  text-white">
                 {/* Plot */}
                 <div className="mb-8">
                   <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">

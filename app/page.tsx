@@ -84,7 +84,7 @@ export default function Home() {
               <div className="flex justify-center items-center mb-4">
                 <Film className="w-12 h-12 text-purple-400 mr-3" />
                 <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  MovieFinder/Applyo
+                  MovieFinder
                 </h1>
               </div>
             </div>
